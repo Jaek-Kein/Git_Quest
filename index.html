@@ -68,7 +68,7 @@ body{background:var(--bg0);color:var(--text);font-family:'Noto Sans KR',sans-ser
 #view-hub.show{display:flex;}
 
 #editor-wrap{flex:1;display:flex;overflow:hidden;}
-#linenos{width:40px;padding:10px 8px 10px 0;background:var(--bg0);text-align:right;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-dim);line-height:1.6;user-select:none;overflow:hidden;flex-shrink:0;}
+#linenos{width:44px;padding:10px 8px 10px 0;background:var(--bg0);text-align:right;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-dim);line-height:1.6;user-select:none;overflow:hidden;flex-shrink:0;white-space:pre;}
 #editor{flex:1;padding:10px 14px;background:var(--bg0);font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.6;color:var(--text);resize:none;border:none;outline:none;overflow-y:auto;}
 
 /* conflict highlight */
@@ -105,6 +105,9 @@ body{background:var(--bg0);color:var(--text);font-family:'Noto Sans KR',sans-ser
 .hub-commit-hash{color:var(--orange);font-family:'JetBrains Mono',monospace;font-size:10px;flex-shrink:0;}
 .hub-commit-msg{color:var(--text);font-size:11px;flex:1;}
 .hub-commit-who{color:var(--text-dim);font-size:10px;flex-shrink:0;}
+.hub-file-row{display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid var(--border-soft);}
+.hub-file-icon{font-size:12px;flex-shrink:0;}
+.hub-file-name{color:var(--text-muted);font-family:'JetBrains Mono',monospace;font-size:11px;}
 .hub-empty{color:var(--text-dim);font-size:12px;text-align:center;padding:24px 0;}
 .hub-pr-card{background:var(--bg2);border:1px solid var(--green-dim);border-radius:8px;padding:12px 14px;margin-top:12px;}
 .hub-pr-title{font-size:12px;font-weight:600;color:var(--green);margin-bottom:6px;}
@@ -604,7 +607,7 @@ const STAGES=[
    intro:'Staging에 파일이 있어. 이제 역사에 새겨보자!',
    mission:'아래 명령어로 첫 번째 커밋을 만들어봐!\n\n`git commit -m "feat: add hero profile"`',
    check:cmd=>cmd.startsWith('git commit -m')&&S.staged.length>0,
-   run:o=>{const msg=parseMsg(cmdCache);const h=rHash();S.commits.push({hash:h,msg,who:'나'});S.staged.forEach(f=>{if(S.files[f]){S.files[f].staged=false;S.files[f].committed=true;}});S.staged=[];o('git',`[main (root-commit) ${h}] ${msg}`);o('out',' 1 file changed, 3 insertions(+)');},
+   run:o=>{const msg=parseMsg(cmdCache);const h=rHash();S.commits.push({hash:h,msg,who:'나'});S.staged.forEach(f=>{if(S.files[f]){S.files[f].staged=false;S.files[f].committed=true;}});S.staged=[];saveSnapshot();o('git',`[main (root-commit) ${h}] ${msg}`);o('out',' 1 file changed, 3 insertions(+)');},
    ok:'첫 커밋 완료! 🎊 Git 역사에 영원히 기록됐어.',tip:'commit = 스냅샷. git log 로 확인 가능!'},
 
   {name:'BRANCH',pill:'branch',collab:false,
@@ -632,7 +635,7 @@ const STAGES=[
    intro:'마지막 기초 미션! 혼자서 전체 흐름 완성해봐.',
    mission:'사이드바 ＋ 버튼으로 `quest.txt` 파일을 만들고\n아래 내용을 입력한 뒤 `Ctrl+S` 저장!\n\n```\nQuest: Git 마스터\nStatus: 진행중\n```\n\n그 다음 `git add quest.txt` → `git commit -m "feat: add quest log"` 🎯',
    check:cmd=>cmd.startsWith('git commit -m')&&S.staged.includes('quest.txt')&&(S.files['quest.txt']?.content||'').trim().length>0,
-   run:o=>{const msg=parseMsg(cmdCache);const h=rHash();S.commits.push({hash:h,msg,who:'나'});S.staged.forEach(f=>{if(S.files[f]){S.files[f].staged=false;S.files[f].committed=true;}});S.staged=[];o('git',`[main ${h}] ${msg}`);o('ok','기초 챕터 완료! 🎉');},
+   run:o=>{const msg=parseMsg(cmdCache);const h=rHash();S.commits.push({hash:h,msg,who:'나'});S.staged.forEach(f=>{if(S.files[f]){S.files[f].staged=false;S.files[f].committed=true;}});S.staged=[];saveSnapshot();o('git',`[main ${h}] ${msg}`);o('ok','기초 챕터 완료! 🎉');},
    ok:'완벽해! 기초 챕터 클리어!\n이제 팀 협업 챕터로 넘어가자. 실무 레벨이야 💪',tip:'init→add→commit→branch→merge→diff. 이 흐름 완전 숙달!'},
 
   // ── 협업 챕터 ──
@@ -654,7 +657,7 @@ const STAGES=[
    intro:'앗, 팀원이 먼저 push했대! 흔한 상황이야. 해결해보자.',
    mission:'먼저 push를 시도해봐. 에러가 날 거야!\n\n`git push origin main`\n\n에러 확인 후 아래 명령어로 해결해봐!\n\n`git pull --rebase origin main`\n`git push origin main`',
    check:cmd=>cmd==='git push origin main'&&S.rebaseActive,
-   run:o=>{const h=rHash();const msg='feat: rebase 후 push 성공';S.commits.push({hash:h,msg,who:'나'});S.pushed=[...S.commits];o('git',`To ${REMOTE_URL}`);o('ok','   main -> main');rHubCommits();S.rebaseActive=false;},
+   run:o=>{const h=rHash();const msg='feat: rebase 후 push 성공';S.commits.push({hash:h,msg,who:'나'});S.pushed=[...S.commits];savePushedFiles();o('git',`To ${REMOTE_URL}`);o('ok','   main -> main');rHubCommits();S.rebaseActive=false;},
    ok:'non-fast-forward 해결 완료! 🎯\npull --rebase → push 순서 꼭 기억해!',tip:'non-fast-forward = 원격이 로컬보다 앞서있을 때. rebase로 내 커밋을 원격 위로 올려서 해결!'},
 
   {name:'PULL',pill:'pull',collab:true,
@@ -682,7 +685,16 @@ const STAGES=[
    intro:'작업 중인데 갑자기 다른 브랜치로 이동해야 할 때!',
    mission:'에디터에서 hero.txt를 열고\n`Status: 전투중` 한 줄을 추가해봐. (저장은 하지 마!)\n\n그 다음 아래 순서로 실행해봐!\n\n`git stash`\n`git checkout main`\n`git stash pop`',
    check:cmd=>cmd==='git stash pop'&&S.stash!==null,
-   run:o=>{if(S.stash){Object.assign(S.files,S.stash);S.stash=null;}o('ok','On branch main');o('out','Changes restored — hero.txt 수정사항 복구됨');rTree();},
+   run:o=>{
+     if(S.stash){
+       Object.entries(S.stash).forEach(([n,f])=>{ if(S.files[n]) S.files[n].content=f.content; });
+       S.stash=null;
+     }
+     o('ok','On branch main');
+     o('out','Changes restored — hero.txt 수정사항 복구됨');
+     if(S.activeFile)openFile(S.activeFile);
+     rTree();
+   },
    ok:'Stash 완료! 임시저장 → 이동 → 복원 흐름이야 🎒',tip:'stash = 서랍. 커밋 안 하고 잠깐 치워뒀다가 꺼낼 수 있어!'},
 
   {name:'GITIGNORE',pill:'ignore',collab:true,
@@ -705,6 +717,14 @@ const STAGES=[
 // ══════════════════════════════════════════════
 function rHash(){return Math.random().toString(16).slice(2,9);}
 function parseMsg(raw){const m=raw.match(/-m\s+"([^"]+)"|-m\s+'([^']+)'|-m\s+(\S+)/);return m?(m[1]||m[2]||m[3]):'commit';}
+function saveSnapshot(){
+  S.committedSnapshot={};
+  Object.entries(S.files).forEach(([n,f])=>{ if(f.committed) S.committedSnapshot[n]=f.content; });
+}
+function savePushedFiles(){
+  // push 시점의 committed 파일 이름 목록 저장
+  S.pushedFiles=Object.keys(S.files).filter(n=>S.files[n].committed&&!S.ignoredFiles.includes(n));
+}
 
 // ══════════════════════════════════════════════
 // VIEW SWITCH
@@ -780,10 +800,28 @@ function rPills(){
 function rHubCommits(){
   const el=document.getElementById('hub-commits');
   if(!S.pushed.length){el.innerHTML='<div class="hub-empty">아직 push된 커밋이 없어요.</div>';return;}
-  el.innerHTML=S.pushed.slice().reverse().map(c=>
+
+  // 커밋 목록
+  const commitRows=S.pushed.slice().reverse().map(c=>
     `<div class="hub-commit-row"><span class="hub-commit-hash">${c.hash.slice(0,7)}</span><span class="hub-commit-msg">${c.msg}</span><span class="hub-commit-who">${c.who||'나'}</span></div>`
   ).join('');
-  document.getElementById('hub-vis').textContent=`${S.pushed.length}개 커밋`;
+
+  // push 시점에 저장된 파일 스냅샷 사용
+  const trackedFiles=S.pushedFiles||[];
+  const fileRows=trackedFiles.length
+    ? trackedFiles.map(n=>
+        `<div class="hub-file-row"><span class="hub-file-icon">📄</span><span class="hub-file-name">${n}</span></div>`
+      ).join('')
+    : '<div class="hub-empty" style="font-size:11px">파일 없음</div>';
+
+  el.innerHTML=`
+    ${commitRows}
+    <div class="hub-files-section">
+      <div class="hub-commits-title" style="margin-top:12px">FILES</div>
+      ${fileRows}
+    </div>
+  `;
+  document.getElementById('hub-vis').textContent=`${S.pushed.length}개 커밋 · ${trackedFiles.length}개 파일`;
 }
 
 function openFile(name){
@@ -948,6 +986,7 @@ function processCmd(raw){
     const un=Object.entries(S.files).filter(([n,i])=>!i.staged&&!i.committed&&!S.ignoredFiles.includes(n)).map(([n])=>n);
     if(un.length){tOut('info','Untracked files:');un.forEach(f=>tOut('err',`  ${f}`));}
     if(!S.staged.length&&!un.length&&S.commits.length)tOut('out','nothing to commit, working tree clean');
+    // stageCheck는 계속 통과 (git status가 미션 조건인 경우 있음)
   }
   if(cmd==='git branch'){
     if(!S.repo){tOut('err','fatal: not a git repository');return;}
@@ -956,6 +995,22 @@ function processCmd(raw){
   if(cmd==='git diff'){
     if(!S.repo){tOut('err','fatal: not a git repository');return;}
     if(S.conflictActive){tOut('conflict','CONFLICT (content): Merge conflict in hero.txt');return;}
+    // 수정된 파일(committed이지만 내용이 변경된 것) 찾기
+    const modified=Object.entries(S.files).filter(([n,f])=>
+      f.committed && !f.staged && !S.ignoredFiles.includes(n)
+    );
+    if(!modified.length){tOut('out','(no changes)');return;}
+    modified.forEach(([name,f])=>{
+      tOut('git',`diff --git a/${name} b/${name}`);
+      tOut('git',`--- a/${name}`);
+      tOut('git',`+++ b/${name}`);
+      // 커밋된 원본은 S.committedSnapshot에서, 없으면 빈 문자열 비교
+      const orig=(S.committedSnapshot?.[name]||'').split('\n');
+      const curr=(f.content||'').split('\n');
+      orig.forEach(line=>{ if(line) tOut('err',`-${line}`); });
+      curr.forEach(line=>{ if(line) tOut('ok',`+${line}`); });
+    });
+    return;
   }
   if(cmd==='git stash list'){
     tOut('out',S.stash?'stash@{0}: WIP on '+S.branch:'(empty)');return;
@@ -1019,17 +1074,28 @@ function processCmd(raw){
     const n=cmd.slice(10).trim();
     if(!S.branches.includes(n)){tOut('err',`merge: ${n} - not something we can merge`);return;}
   }
+  // git remote -v
+  if(cmd==='git remote -v'){
+    if(!S.remote){tOut('err','fatal: No remote configured');return;}
+    tOut('out',`origin\t${S.remote} (fetch)`);
+    tOut('out',`origin\t${S.remote} (push)`);
+    // stageCheck 계속 (REMOTE 스테이지 조건)
+  }
   // git remote add
   if(cmd.startsWith('git remote add ')){
     const parts=cmd.slice(15).trim().split(/\s+/);
     if(parts.length<2){tOut('err','usage: git remote add <name> <url>');return;}
-    const[alias,url]=parts;S.remote=url;
-    tOut('ok',`Remote '${alias}' added: ${url}`);rGit();
+    const[alias,url]=parts;
+    S.remote=url;
+    tOut('ok',`Remote '${alias}' added: ${url}`);
+    rGit();
+    return;
   }
   // git push
   if(cmd.startsWith('git push') && cmd!=='git push origin feature'){
     if(!S.repo){tOut('err','fatal: not a git repository');return;}
     if(!S.remote){tOut('err','fatal: No remote configured. Use git remote add origin <url>');return;}
+    if(!S.commits.length){tOut('err','error: src refspec main does not match any');return;}
     const curName=STAGES[S.stage]?.name;
     // PUSH_CONFLICT 스테이지: rebase 전 첫 push → non-fast-forward 에러
     if(curName==='PUSH_CONFLICT'&&!S.rebaseActive){
@@ -1043,6 +1109,7 @@ function processCmd(raw){
     // PUSH 스테이지: 정상 push → S.pushed 채우고 Hub 탭 노출
     if(curName==='PUSH'&&cmd==='git push origin main'){
       S.pushed=[...S.commits];
+      savePushedFiles();
       tOut('git','Enumerating objects: done.');
       tOut('git','Counting objects: 100% done.');
       tOut('git',`To ${REMOTE_URL}`);
@@ -1052,6 +1119,13 @@ function processCmd(raw){
       tOut('info','👆 이제 🌐 Quest Hub 탭을 열어서 커밋을 확인해봐!');
       return;
     }
+    // 그 외 스테이지에서 push → 일반 push 성공 출력
+    S.pushed=[...S.commits];
+    savePushedFiles();
+    tOut('git',`To ${S.remote}`);
+    tOut('ok',`   ${S.branch} -> ${S.branch}`);
+    rHubCommits();
+    return;
   }
   // git pull --rebase
   if(cmd==='git pull --rebase origin main'){
@@ -1070,10 +1144,20 @@ function processCmd(raw){
   // git stash
   if(cmd==='git stash'){
     if(!S.repo){tOut('err','fatal: not a git repository');return;}
-    S.stash={...S.files};
+    // 현재 파일 내용 스냅샷 저장
+    S.stash = {};
+    Object.entries(S.files).forEach(([n,f])=>{ S.stash[n]={...f, content:f.content}; });
+    // 워킹 디렉토리를 마지막 커밋 상태로 되돌리기
+    // committed=true 파일은 content 유지, uncommitted 파일은 내용 비움
+    Object.entries(S.files).forEach(([n,f])=>{
+      if(!f.committed){ f.content=''; }
+      f.staged=false;
+    });
+    S.staged=[];
     tOut('ok','Saved working directory and index state WIP on '+S.branch);
     showToast('📦 변경사항 stash에 저장됨','info',2000);
-    if(S.files['hero.txt'])S.files['hero.txt'].content='';
+    // 에디터에 반영
+    if(S.activeFile)openFile(S.activeFile);
     rTree();return;
   }
   if(cmd==='git stash pop'){
@@ -1101,13 +1185,15 @@ function processCmd(raw){
     cmd.startsWith('git add ')||cmd.startsWith('git commit ')||
     cmd.startsWith('git branch ')||cmd.startsWith('git checkout ')||
     cmd.startsWith('git merge ')||cmd.startsWith('git remote add ')||
-    cmd.startsWith('git push')||cmd.startsWith('touch ')||
-    cmd.startsWith('echo ')||cmd.startsWith('there is no way up ');
+    cmd.startsWith('git remote')||
+    cmd.startsWith('git push')||cmd.startsWith('git pull')||
+    cmd.startsWith('touch ')||cmd.startsWith('echo ')||
+    cmd.startsWith('there is no way up ');
   const handledExact=[
     'git init','git log','git status','git branch','git diff',
     'git stash list','git remote -v','git pull --rebase origin main',
     'git pull origin main','git push','git stash','git stash pop',
-    'git rebase main','git push origin feature',
+    'git rebase main','git push origin feature','git push origin main',
     'clear','help','ls'
   ];
 
