@@ -1249,6 +1249,12 @@ document.getElementById('term-body').addEventListener('click',()=>ti.focus());
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape')closeNFM();
   if(e.key==='n'&&e.target===document.body)openNFM();
+  // 스테이지 클리어 오버레이가 열려있을 때 Enter/Space로 다음 스테이지
+  const completeVisible=document.getElementById('complete').classList.contains('show');
+  if(completeVisible&&(e.key==='Enter'||e.key===' ')){
+    e.preventDefault();
+    nextStage();
+  }
 });
 
 // ══════════════════════════════════════════════
